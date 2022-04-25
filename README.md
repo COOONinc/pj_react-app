@@ -22,6 +22,7 @@ npm install react-router-dom@5
 npm install moment
 npm install styled-components
 npm install use-file-upload
+npm install shortid
 ```
  
 # Usage
