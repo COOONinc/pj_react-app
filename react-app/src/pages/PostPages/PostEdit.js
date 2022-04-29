@@ -1,15 +1,17 @@
-import {useState, useContext,useEffect}from "react";
+import React,{useState, useContext,useEffect}from "react";
 import { Link } from "react-router-dom";
 import { Header } from "../../components/header/Header";
 import firebase from '../../config/firebase'
 import { AuthContext } from '../../AuthService'
 import moment from "moment";
 
-const Form=({addPost})=>{
-    const [title,setTitle]=useState("")
-    const [text, setText]=useState("")
+const PostEdit=()=>{
+    const [editTitle,setEditTitle]=useState("")
+    const [editText, setEditText]=useState("")
     const [posts, setPosts] = useState([])
     const user = useContext(AuthContext)
+    const [editId, setEditId] = useState("")
+    
 
     useEffect(() => {
         firebase.firestore().collection('posts')
@@ -24,15 +26,31 @@ const Form=({addPost})=>{
     const handleSubmit = (e) => {
         e.preventDefault();
         var timestamp = moment().valueOf();
+        // function confirmId(snapshot) {
+        //     return snapshot.forEach(confirmIds);
+        // }
+        // function confirmIds(doc) {
+        //     const editId = doc.id
+        // }
+        firebase.firestore().collection('postEdit')
+            .orderBy("timestamp", "desc")
+            .limit(1)
+            .onSnapshot(function(snapshot) {
+                snapshot.forEach(function(doc) {
+                    const editId = doc.id
+                    setEditId(editId)
+                    return editId
+                });
+            });
+        console.log(editId)
         firebase.firestore().collection('posts')
-            .set({
+            .doc(editId).update({
                 user: user.displayName,
-                title:title,
-                text: text,
+                title:editTitle,
+                text:editText,
                 timestamp:timestamp,
             })
-        if (text.trim() === '') return alert('文字を入力してください');
-        addPost(title,text,timestamp);
+        if (editText.trim() === '') return alert('文字を入力してください');
     };
 
 
@@ -45,27 +63,27 @@ const Form=({addPost})=>{
                 
                 <form onSubmit={handleSubmit}>
                     <input
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
                         placeholder="Write a title"
                     />
                     <br/>
                     <textarea
                         className="postForm__text"
-                        value={text}
+                        value={editText}
                         type="text" 
-                        onChange={(e) => setText(e.target.value)}
+                        onChange={(e) => setEditText(e.target.value)}
                         placeholder="Write a caption"
                     />
                     <br />
                     <button 
-                        disabled={text.trim() === ''} 
+                        disabled={editText.trim() === ''} 
                         id="js-show-popup"
-                    >投稿</button>
+                    >修正完了</button>
                 </form>
             </div>
         </>
     )
 }
 
-export default Form
+export default PostEdit
