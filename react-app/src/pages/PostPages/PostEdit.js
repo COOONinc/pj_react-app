@@ -11,8 +11,10 @@ const PostEdit=()=>{
     const [posts, setPosts] = useState([])
     const user = useContext(AuthContext)
     const [editId, setEditId] = useState("")
-    
 
+    const modal = document.getElementById('modal');
+    const mask = document.getElementById('mask');
+    
     useEffect(() => {
         firebase.firestore().collection('posts')
             .onSnapshot((snapshot) => {
@@ -22,16 +24,9 @@ const PostEdit=()=>{
                 setPosts(posts)
             })
     }, [])
-
     const handleSubmit = (e) => {
         e.preventDefault();
         var timestamp = moment().valueOf();
-        // function confirmId(snapshot) {
-        //     return snapshot.forEach(confirmIds);
-        // }
-        // function confirmIds(doc) {
-        //     const editId = doc.id
-        // }
         firebase.firestore().collection('postEdit')
             .orderBy("timestamp", "desc")
             .limit(1)
@@ -52,8 +47,6 @@ const PostEdit=()=>{
             })
         if (editText.trim() === '') return alert('文字を入力してください');
     };
-
-
     return(
         <>
             <Header/>
@@ -76,11 +69,43 @@ const PostEdit=()=>{
                         placeholder="Write a caption"
                     />
                     <br />
-                    <button 
+                    <button
                         disabled={editText.trim() === ''} 
-                        id="js-show-popup"
+                        id="open"
+                        onClick={()=>{
+                            modal.classList.remove('hidden');
+                            mask.classList.remove('hidden');
+                        }}
                     >修正完了</button>
+                    
                 </form>
+                <div id="mask" className="hidden"></div>
+                <section id="modal" className="hidden">
+                    
+                    <form onSubmit={handleSubmit} >
+                        
+                        <section className="hidden">
+                            <p>修正を完了しますか？</p>
+                            <button
+                                id="close" 
+                                onClick={()=>{
+                                    modal.classList.add('hidden');
+                                    mask.classList.add('hidden');
+                                }}>
+                                完了する
+                            </button>
+                        </section>
+                    </form>
+                    <button
+                        id="close"
+                        onClick={()=>{
+                            modal.classList.add('hidden');
+                            mask.classList.add('hidden');
+                        }}
+                    >戻る</button>
+                </section>
+                    
+                
             </div>
         </>
     )
